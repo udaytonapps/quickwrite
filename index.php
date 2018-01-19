@@ -1,38 +1,30 @@
 <?php
-
-require_once "config.php";
+require_once('../config.php');
+require_once('dao/QW_DAO.php');
 
 use \Tsugi\Core\LTIX;
+use \QW\DAO\QW_DAO;
 
 // Retrieve the launch data if present
-$LTI = LTIX::requireData();
+$LAUNCH = LTIX::requireData();
+
 $p = $CFG->dbprefix;
-$displayname = $USER->displayname;
 
-// Start of the output
-$OUTPUT->header();
-?>
-    <!-- Our main css file that overrides default Tsugi styling -->
-    <link rel="stylesheet" type="text/css" href="styles/main.css">
-<?php
-$OUTPUT->bodyStart();
+$QW_DAO = new QW_DAO($PDOX, $p);
 
-$OUTPUT->flashMessages();
+$Main = $QW_DAO->getSetID($CONTEXT->id, $LINK->id);
 
-$OUTPUT->welcomeUserCourse();
+if (!$Main) {
+    $_SESSION["SetID"] = $QW_DAO->createMain($USER->id, $CONTEXT->id, $LINK->id);
+} else {
+    $_SESSION["SetID"] = $Main;
+}
 
-echo("<pre>Global Tsugi Objects:\n\n");
-var_dump($USER);
-var_dump($CONTEXT);
-var_dump($LINK);
+if ( $USER->instructor ) {
 
-echo("\n<hr/>\n");
-echo("Session data (low level):\n");
-echo($OUTPUT->safe_var_dump($_SESSION));
+    header( 'Location: '.addSession('instructor-home.php') ) ;
 
-$OUTPUT->footerStart();
-?>
-    <!-- Our main javascript file for tool functions -->
-    <script src="scripts/main.js" type="text/javascript"></script>
-<?php
-$OUTPUT->footerEnd();
+} else { // student
+
+	header( 'Location: '.addSession('student-home.php') ) ;
+}
