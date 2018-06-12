@@ -43,7 +43,7 @@ $DATABASE_INSTALL = array(
     UserID      INTEGER NULL,
     SetID       INTEGER NULL,
     QID      	INTEGER NULL,
-	Answer      varchar(3000) NULL,
+	Answer      TEXT NULL,
     Modified    datetime NULL,
     
     PRIMARY KEY(AnswerID)

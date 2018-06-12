@@ -93,7 +93,7 @@ if ( $USER->instructor ) {
     }
     $columnIterator->next();
 
-    $exportFile->getActiveSheet()->setTitle('Quick Write');
+    $exportFile->getActiveSheet()->setTitle('Quick_Write');
 
     foreach($exportFile->getActiveSheet()->getColumnDimension() as $col) {
         $col->setAutoSize(true);
@@ -102,7 +102,7 @@ if ( $USER->instructor ) {
 
     // Redirect output to a client’s web browser (Excel5)
     header('Content-Type: application/vnd.ms-excel');
-    header('Content-Disposition: attachment;filename=Quick Write.xls');
+    header('Content-Disposition: attachment;filename=Quick_Write.xls');
     header('Cache-Control: max-age=0');
     // If you're serving to IE over SSL, then the following may be needed
     header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
