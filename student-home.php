@@ -18,92 +18,81 @@ $OUTPUT->header();
 
 include("tool-header.html");
 
-$OUTPUT->bodyStart();    
+$OUTPUT->bodyStart();
 
-echo('<nav class="navbar navbar-default">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="index.php">Quick Write</a>
-        </div>
-    </div>
-    </nav>');
+$SetID = $_SESSION["qw_id"];
 
-echo ('<div class="container-fluid">
-        <h2 class="tool-title col-sm-offset-1">Quick Write</h2>');
-
-$SetID = $_SESSION["SetID"];
-
-$questions = $QW_DAO->getQuestions($SetID);	
+$questions = $QW_DAO->getQuestions($SetID);
 $totalQuestions = count($questions);
 
-if($totalQuestions == 0) {
-    echo ('<h4 style="margin:50px;">No question prompts have been created.</h4>');
-} else {
+$moreToSubmit = false;
 
-    echo('<form method="post" action="actions/Answer_Submit.php">');
-
-    echo('<div id="answerContainer">');
-    $moreToSubmit = false;
-    foreach ( $questions as $question ) {
-        $answerText = "";
-        $QID = $question["QID"];
-        $answerId = -1;
-
-        $answer = $QW_DAO->getStudentAnswerForQuestion($QID, $USER->id);
-
-        if ($answer) {
-            $answerId = $answer['AnswerID'];
-            $answerText = $answer['Answer'];
-        }
-
-        if (!$answer || $answerText == "") {
-            echo('<div class="row">
-                    <div class="col-sm-2 text-right question-number"><h4>'.$question["QNum"].'.</h4></div>
-                    <div class="col-sm-8 question-text">'.$question["Question"].'</div>
-                  </div>');
-            echo('<div class="row">
-                    <div class="col-sm-8 col-sm-offset-2 answer-date">
-                        <textarea class="form-control" name="A'.$question["QNum"].'" rows="3" autofocus></textarea>');
-            $moreToSubmit = true;
-        } else {
-            $dateTime = new DateTime($answer['Modified']);
-            $formattedDate = $dateTime->format("m-d-y")." at ".$dateTime->format("h:i A");
-
-            echo('<div class="row">
-                    <div class="col-sm-2 text-right question-number">
-                      <h4><span class="fa fa-check fa-lg text-success checkmark"></span> '.$question["QNum"].'.</h4>
-                    </div>
-                    <div class="col-sm-8 question-text">'.$question["Question"].'</div>
-                  </div>');
-            echo('<div class="row">
-                    <div class="col-sm-8 col-sm-offset-2">
-                        <div class="answer-text">'.$answerText.'<br />
-                            <input type="hidden" name="A'.$question["QNum"].'" value="'.$answerText.'" />
+?>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-sm-offset-1" id="qwInfo">
+            <h1>Quick Write</h1>
+            <p>Use the form below to respond to the question prompts in the list. You can respond to each question all at once or one at a time over multiple sessions. However, once you respond to a question you will not be able to edit or delete your answer.</p>
+        </div>
+        <div class="col-sm-7">
+            <form method="post" action="actions/Answer_Submit.php">
+                <div class="list-group fadeInFast" id="qwContentContainer">
+                    <?php
+                    if ($totalQuestions == 0) {
+                        echo ('<h4 class="alert alert-info text-center">No question prompts have been created.</h4>');
+                    } else {
+                        ?>
+                        <div class="list-group-item">
+                            <h3>Questions (<?php echo($totalQuestions); ?>)</h3>
                         </div>
-                        <div class="answer-date text-right">
-                            <small><em>'.$formattedDate.'</em></small>
-                        </div>');
-        }
+                        <?php
+                        foreach ($questions as $question) {
+                            $answerText = "";
+                            $question_id = $question["question_id"];
+                            $answerId = -1;
 
-        echo('<input type="hidden" name="QuestionID'.$question["QNum"].'" value="'.$QID.'"/>');
-        echo('<input type="hidden" name="AnswerID'.$question["QNum"].'" value="'.$answerId.'"/>');
+                            $answer = $QW_DAO->getStudentAnswerForQuestion($question_id, $USER->id);
 
-        echo('</div></div>'); // End last column and row
-    }
+                            if ($answer) {
+                                $answerId = $answer['answer_id'];
+                                $answerText = $answer['answer_txt'];
+                            }
 
-    if ($moreToSubmit) {
-        echo('<div class="row"><div class="col-sm-10 col-sm-offset-2 answer-submit"><input type="submit" class="btn btn-success" value="Submit"></div></div>');
-    }
+                            echo('<div class="list-group-item">
+                                <h4>'.$question["question_txt"].'</h4>
+                                <p>');
 
-    echo('</div>'); // End question container
+                            if (!$answer || $answerText == "") {
+                                echo('<textarea class="form-control" name="A'.$question["question_num"].'" rows="3" autofocus></textarea>');
+                                $moreToSubmit = true;
+                            } else {
+                                $dateTime = new DateTime($answer['modified']);
+                                $formattedDate = $dateTime->format("m-d-y")." at ".$dateTime->format("h:i A");
 
-    echo ('<input type="hidden" name="Total" value="'.$totalQuestions.'"/>');
+                                echo($answerText.'
+                                    <div class="text-right text-muted">'.$formattedDate.'</div>
+                                    <input type="hidden" name="A'.$question["question_num"].'" value="'.$answerText.'" />');
+                            }
+                            echo ('</p>');
+                            echo('<input type="hidden" name="QuestionID'.$question["question_num"].'" value="'.$question_id.'"/>');
+                            echo('<input type="hidden" name="AnswerID'.$question["question_num"].'" value="'.$answerId.'"/>');
 
-    echo('</form>');
-}
-
-echo ('</div>'); // End container
-
+                            echo('</div>');
+                        }
+                    }
+                    ?>
+                </div>
+                <input type="hidden" name="Total" value="<?php echo($totalQuestions); ?>"/>
+                <?php
+                if ($moreToSubmit) {
+                    echo('<input type="submit" class="btn btn-success big-shadow pull-right" value="Save Responses">');
+                }
+                ?>
+            </form>
+        </div>
+    </div>
+</div>
+<?php
 $OUTPUT->footerStart();
 
 include("tool-footer.html");

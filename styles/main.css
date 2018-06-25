@@ -1,92 +1,85 @@
 /* Main CSS file */
-* {
-    border-radius: 0 !important;
+body {
+    background: #efefef url("../images/desk.png") no-repeat 50px 350px;
+    background-size: 50% auto;
 }
-h3 {
-    font-size: 22px;
+#qwInfo {
+    line-height: 2.5em;
+    margin-bottom: 1em;
 }
-h2.tool-title {
-    margin-top: 0;
+#qwInfo p {
+    line-height: 1.5em;
 }
-h4 {
-    line-height: 1.4em !important;
+#qwContentContainer {
+    -webkit-box-shadow: 0 8px 17px 0 rgba(0,0,0,.2),0 6px 20px 0 rgba(0,0,0,.19);
+    box-shadow: 0 8px 17px 0 rgba(0,0,0,.2),0 6px 20px 0 rgba(0,0,0,.19);
 }
-a.disabled, a.disabled:hover {
-    cursor: not-allowed;
-    pointer-events: none;
-    opacity: .65;
-    box-shadow: none;
-	
+#viewAllChevron {
+    font-weight: lighter;
 }
-.navbar {
-    box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+div.question-actions a {
+    color: #666666;
+    letter-spacing: 6px;
 }
-.navbar-header {
-    padding-right: 16px;
-    padding-left: 16px;
+div.question-actions a:hover, div.question-actions a:active, div.question-actions a:focus {
+    text-decoration: none;
 }
-.navbar-nav .fa-stack {
-    position: absolute;
+#allResultsTable {
+    background: #fff;
+    -webkit-box-shadow: 0 8px 17px 0 rgba(0,0,0,.2),0 6px 20px 0 rgba(0,0,0,.19);
+    box-shadow: 0 8px 17px 0 rgba(0,0,0,.2),0 6px 20px 0 rgba(0,0,0,.19);
 }
-div.row {
-    margin-left: 0;
-    margin-right: 0;
-	padding:0;
+#allResultsTable small.date {
+    font-weight: normal;
 }
-div.add-button {
-    margin-top: 1em;
-}
-#answerContainer .checkmark {
-    margin-right: 24px;
-}
-#questionContainer .row {
-    margin: 1em 0;
-    border-top: 1px solid #ddd;
-}
-#questionContainer .question-text {
+#allResultsTable .question-col {
     font-weight: bold;
 }
-#questionContainer .question-actions {
-    padding-top: 0.8em;
+.export-link {
+    font-size: 14px;
+    font-weight: lighter;
+    padding-top: 16px;
 }
-#answerContainer .answer-text, #allResultsContainer .answer-text {
-    border: 1px solid #ccc;
-    padding: .5em;
-    background: #efefef;
+.student-name-header {
+    margin-top: 0;
 }
-#answerContainer .answer-date {
-    margin-bottom: 1.5em;
+.big-shadow {
+    -webkit-box-shadow: 0 8px 17px 0 rgba(0,0,0,.2),0 6px 20px 0 rgba(0,0,0,.19);
+    box-shadow: 0 8px 17px 0 rgba(0,0,0,.2),0 6px 20px 0 rgba(0,0,0,.19);
 }
-#answerContainer .question-text {
-    font-weight: 500;
-    margin: 10px 0;
-    font-size: 18px;
-    line-height: 1.4em;
+.small-shadow {
+    -webkit-box-shadow: 0 4px 8px 0 rgba(0,0,0,.2),0 3px 10px 0 rgba(0,0,0,.19);
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,.2),0 3px 10px 0 rgba(0,0,0,.19);
 }
-div.answer-submit {
-    padding-top: 1.5em;
+/* The side navigation menu */
+.side-nav {
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: -200px;
+    background-color: #111;
+    overflow-x: hidden;
+    padding-top: 60px;
+    transition: 0.5s;
 }
-@media (max-width: 768px) {
-    #questionContainer .question-number, #answerContainer .question-number {
-        text-align: left;
-    }
-    #questionContainer .question-actions {
-        text-align: left;
-        padding-top: 1em;
-    }
+.side-nav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 16px;
+    color: #919191;
+    display: block;
+    transition: 0.2s;
 }
-.student-answers {
-    max-height: 600px;
-    overflow: auto;
+.side-nav a:hover {
+    color: #f1f1f1;
 }
-#allResultsContainer > .row {
-    border: 1px solid #ccc;
-    margin-bottom: 1.5em;
-    padding: 15px;
-}
-#allResultsContainer .question-number {
-    padding: .5em;
-}
-#allResultsContainer .answer-date {
-    margin-bottom: 1em;
+.side-nav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 18px;
+    font-size: 24px;
+    margin-left: 50px;
+    font-weight: lighter;
 }

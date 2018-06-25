@@ -20,171 +20,100 @@ include("tool-header.html");
 
 $OUTPUT->bodyStart();
 
-include("menu.php");
+$questions = $QW_DAO->getQuestions($_SESSION["qw_id"]);
 
-$SetID = $_SESSION["SetID"];
-
-$questions = $QW_DAO->getQuestions($SetID);
 $totalQuestions = count($questions);
+?>
+<div id="sideNav" class="side-nav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><span class="fa fa-times"></span></a>
+    <a href="splash.php"><span class="fa fa-fw fa-pencil-square" aria-hidden="true"></span> Getting Started</a>
+    <a href="actions/ExportToFile.php"><span class="fa fa-fw fa-cloud-download" aria-hidden="true"></span> Export Results</a>
+    <a href="actions/DeleteAll.php" onclick="return confirmResetTool();"><span class="fa fa-fw fa-trash" aria-hidden="true"></span> Reset Tool</a>
+</div>
 
-$_SESSION["Next"] = $totalQuestions + 1;
-
-$numQuestionsMsg = $totalQuestions . " " . (($totalQuestions == 1) ? "question" : "questions") . " posted";
-
-echo ('<div class="container-fluid">');
-
-echo('<div><h2 class="tool-title">Quick Write</h2></div>');
-
-echo('<div id="Btn01" class="pull-right">
-        <span><em>'.$numQuestionsMsg.'</em></span>
-        </div>');
-
-echo ('<div><p>Add questions to quickly collect feedback from your students.</p></div>');
-
-echo ('<div id="questionContainer">');
-foreach ($questions as $question ) {
-
-    $QID = $question['QID'];
-
-    $answers = $QW_DAO->getAllAnswersToQuestion($SetID, $QID);
-    $numAnswers = count($answers);
-
-    // Question Row
-    echo('<div class="row">           
-            <div class="col-sm-1 text-right question-number">
-                <h4>'.$question["QNum"].'.</h4>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="javascript:void(0);" onclick="openSideNav();"><span class="fa fa-bars"></span> Quick Write</a>
             </div>
-            
-            <div class="col-sm-8 question-text">
-                <h4>'.$question["Question"].'</h4>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 col-sm-offset-1" id="qwInfo">
+                <h1>Quick Write</h1>
+                <p>Use the button below to add a question to the list. Once a question has been created, you can make changes to the text or delete it and its answers.</p>
+                <a href="#addOrEditQuestion" data-toggle="modal" class="btn btn-success small-shadow"><span class="fa fa-plus"></span> Add Question</a>
             </div>
-            
-            <div class="col-sm-3 text-right question-actions">
-                <a href="#'.$QID.'"  class="btn btn-primary"  data-toggle="modal">Report ('.$numAnswers.') </a>
-                <a href="#Edit_'.$QID.'" class="btn btn-success" data-toggle="modal">Edit</a>
-                <a class="btn btn-danger" href="actions/Delete.php?QID='.$QID.'" onclick="return confirmDelete();">
-                    <span class="fa fa-trash"></span>
-                </a>
-            </div>
-          </div>');
-
-    ?>
-
-    <!-- Modal with student answers -->
-    <div class="modal fade" id="<?php echo $QID; ?>" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-
-                <div class="modal-header bg-primary ">
-                    <button type="button" class="close" data-dismiss="modal"><span class="fa fa-times bg-primary" aria-hidden="true"></span><span class="sr-only">Close</span></button>
-                    <?php echo ('<h3 id="qTitle">Question '.$question["QNum"].'</h3><h4>'.$question["Question"].'</h4>');?>
-                </div>
-                <div class="modal-body student-answers">
+            <div class="col-sm-7">
+                <div class="list-group fadeInFast" id="qwContentContainer">
+                    <div class="list-group-item">
+                        <a href="view-all-results.php" class="pull-right">View All Results <span id="viewAllChevron" class="fa fa-chevron-right"></span></a>
+                        <h3>Questions (<?php echo($totalQuestions); ?>)</h3>
+                    </div>
                     <?php
-
-                    if ($numAnswers === 0) {
-                        echo("<h4 class='text-center'><em>No students have answered this question yet.</em></h4>");
-                    } else {
-                        foreach ( $answers as $answer ) {
-                            $UserID = $answer["UserID"];
-
-                            $displayName = $QW_DAO->findDisplayName($UserID);
-
-                            $answerText = $answer["Answer"];
-                            $answerDate = new DateTime($answer["Modified"]);
-
-                            $formattedDate = $answerDate->format("m-d-y")." at ".$answerDate->format("h:i A");
-
-                            echo('<div class="row">
-                                <div class="col-sm-3"><strong>'.$displayName.'</strong><br /><small>'.$formattedDate.'</small></div>
-                                <div class="col-sm-9">'.$answerText.'</div>
-                              </div>');
-                        }
+                    foreach ($questions as $question) {
+                        $totalAnswers = $QW_DAO->countAnswersForQuestion($question["question_id"]);
+                        echo('
+                        <div class="list-group-item">
+                            <h4 id="questionText'.$question["question_id"].'">'.$question["question_txt"].'</h4>
+                            <form id="questionTextForm'.$question["question_id"].'" action="actions/AddOrEditQuestion.php" method="post" style="display:none;">
+                                <p>
+                                    <input type="hidden" name="questionId" value="'.$question["question_id"].'">
+                                    <textarea class="form-control" name="questionText" rows="4" required>'.$question["question_txt"].'</textarea>
+                                </p>
+                                <div class="text-right">
+                                    <input type="submit" class="btn btn-success" value="Save" form="questionTextForm'.$question["question_id"].'">
+                                    <a href="javascript:void(0);" class="btn btn-link" onclick="cancelEditQuestionText('.$question["question_id"].');">Cancel</a>
+                                </div>                                
+                            </form>
+                            <div class="question-actions button-group pull-right">
+                                <a href="javascript:void(0);" onclick="editQuestionText('.$question["question_id"].');">
+                                    <span class="fa fa-lg fa-pencil" aria-hidden="true"></span>
+                                    <span class="sr-only">Edit Question Text</span>
+                                </a>
+                                <a onclick="return confirmDeleteQuestion();" href="actions/DeleteQuestion.php?question_id='.$question["question_id"].'">
+                                    <span aria-hidden="true" class="fa fa-lg fa-trash"></span>
+                                    <span class="sr-only">Delete Question</span>
+                                </a>
+                            </div>
+                            <a class="question-answers" href="view-answers.php?question_id='.$question["question_id"].'">Answers ('.$totalAnswers.')</a>
+                        </div>
+                        ');
                     }
                     ?>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
-                </div>
             </div>
         </div>
+
     </div>
 
-    <!-- Edit Question Text Modal -->
-    <div class="modal fade" id="Edit_<?php echo $QID; ?>" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="addOrEditQuestion" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Edit Question Text</h4>
+                    <h4 class="modal-title">Add Question</h4>
                 </div>
-                <?php
-                echo ('<form method="post" action="actions/AddQ_Submit.php">
-                        <div class="modal-body">
-                            <input type="hidden" name="QID" value="'.$QID.'"/>
-                            <textarea class="form-control" name="Question" rows="4" autofocus required>'.$question["Question"].'</textarea>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-                            <input type="submit" class="btn btn-success" value="Save">
-                        </div>
-                      </form>');
-                ?>
-            </div>
-        </div>
-    </div>
-
-    <?php
-}
-echo("</div>"); // End question container
-
-// Add Question Modal
-?>
-
-    <div class="modal fade" id="addQuestion" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Add Question <?php echo($_SESSION["Next"]); ?></h4>
-                </div>
-                <?php
-                echo ('<form method="post" action="actions/AddQ_Submit.php">
-                        <div class="modal-body">
-                            <input type="hidden" name="QID" value="-1"/>
-                            <input type="hidden" name="QNum" value="'.$_SESSION["Next"].'"/>
-                            <textarea class="form-control" name="Question" id="questionText" rows="4" autofocus required></textarea>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-                            <input type="submit" class="btn btn-success" value="Save">
-                        </div>
-                      </form>');
-                ?>
+                <form method="post" id="addQuestionForm" action="actions/AddOrEditQuestion.php">
+                    <div class="modal-body">
+                        <input type="hidden" name="questionId" id="questionId" value="-1">
+                        <label for="questionText">Question Text</label>
+                        <textarea class="form-control" name="questionText" id="questionText" rows="4" autofocus required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                        <input type="submit" form="addQuestionForm" class="btn btn-success" value="Save">
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
 <?php
-
-echo ('<div class="col-sm-8 col-sm-offset-1 add-button"><a class="btn btn-success" href="#addQuestion" data-toggle="modal"><span class="fa fa-plus" aria-hidden="true"></span> Add Question</a></div>');
-
-echo ('</div>'); // End container
 
 $OUTPUT->footerStart();
 
 include("tool-footer.html");
 
-?>
-<script type="text/javascript">
-    $(document).ready(function(){
-        // Clear any entered question text on modal hide
-        var addModal = $("#addQuestion");
-        addModal.on('hidden.bs.modal', function() {
-            $("#questionText").val('');
-        });
-        addModal.on('shown.bs.modal', function() {
-            $("#questionText").focus();
-        })
-    });
-</script>
-<?php
 $OUTPUT->footerEnd();

@@ -12,19 +12,37 @@ $p = $CFG->dbprefix;
 
 $QW_DAO = new QW_DAO($PDOX, $p);
 
-$Main = $QW_DAO->getSetID($CONTEXT->id, $LINK->id);
-
-if (!$Main) {
-    $_SESSION["SetID"] = $QW_DAO->createMain($USER->id, $CONTEXT->id, $LINK->id);
-} else {
-    $_SESSION["SetID"] = $Main;
-}
+$currentTime = new DateTime('now', new DateTimeZone($CFG->timezone));
+$currentTime = $currentTime->format("Y-m-d H:i:s");
 
 if ( $USER->instructor ) {
 
-    header( 'Location: '.addSession('instructor-home.php') ) ;
+    $_SESSION["qw_id"] = $QW_DAO->getOrCreateMain($USER->id, $CONTEXT->id, $LINK->id, $currentTime);
 
+    $hasQuestions = $QW_DAO->getQuestions($_SESSION["qw_id"]);
+
+    if (!$hasQuestions) {
+        // No questions check if user wants to see the splash on new instances of tool
+        $skipSplash = $QW_DAO->skipSplash($USER->id);
+
+        if ($skipSplash) {
+            header( 'Location: '.addSession('instructor-home.php') ) ;
+        } else {
+            header('Location: '.addSession('splash.php'));
+        }
+    } else {
+        // Instructor has already setup this instance
+        header( 'Location: '.addSession('instructor-home.php') ) ;
+    }
 } else { // student
 
-	header( 'Location: '.addSession('student-home.php') ) ;
+    $mainId = $QW_DAO->getMainID($CONTEXT->id, $LINK->id);
+
+    if (!$mainId) {
+        echo ("<h1>Instructor needs to do stuff");
+    } else {
+        $_SESSION["qw_id"] = $mainId;
+
+        header( 'Location: '.addSession('student-home.php') ) ;
+    }
 }
