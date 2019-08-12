@@ -78,7 +78,7 @@ foreach ($studentAndDate as $student_id => $mostRecentDate) {
                     <input type="hidden" name="student_id" value="<?=$student_id?>">
                     <div class="form-group">
                         <label>
-                        <input type="text" class="form-control" name="grade" value="<?=$grade ? $grade : ''?>">/<?=$pointsPossible?>
+                        <input type="text" class="form-control" name="grade" value="<?=$grade?>">/<?=$pointsPossible?>
                         </label>
                     </div>
                     <button type="submit" class="btn btn-default">Update</button>
