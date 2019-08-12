@@ -37,6 +37,18 @@ if (!isset($answerText) || trim($answerText) == "") {
     $result["answer_content"] = ob_get_clean();
 
     $_SESSION['success'] = "Answer saved.";
+
+    // Notify elearning that there is a new answer
+    // the message
+    $msg = "A new quick write was submitted on Learn by ".$QW_DAO->findDisplayName($USER->id)." (".$QW_DAO->findEmail($USER->id).").\n
+    Question: ".$question["question_txt"]."\n
+    Answer: ".$answerText;
+
+    // use wordwrap() if lines are longer than 70 characters
+    $msg = wordwrap($msg,70);
+
+    // send email
+    mail("elearning@udayton.edu","A new quickwrite has been submitted on Learn",$msg);
 }
 
 $OUTPUT->buffer=true;
