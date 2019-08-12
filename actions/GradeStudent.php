@@ -23,7 +23,7 @@ if ($USER->instructor) {
         $_SESSION['error'] = "Invalid Grade.";
     } else {
         $currentGrade = $QW_DAO->getStudentGrade($qw_id, $studentId);
-        if (!$currentGrade) {
+        if (!$currentGrade && $currentGrade !== 0) {
             // No grade yet so create it
             $QW_DAO->createGrade($qw_id, $studentId, $grade, $currentTimeForDB);
         } else {
