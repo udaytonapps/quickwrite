@@ -58,7 +58,7 @@ $DATABASE_INSTALL = array(
     grade_id        INTEGER NOT NULL AUTO_INCREMENT,
     qw_id           INTEGER NOT NULL,
     user_id         INTEGER NOT NULL,
-    points_earned   FLOAT NOT NULL DEFAULT 0,
+    grade           FLOAT NOT NULL DEFAULT 0,
 	modified        datetime NULL,
     
     CONSTRAINT `{$CFG->dbprefix}qw_ibfk_3`

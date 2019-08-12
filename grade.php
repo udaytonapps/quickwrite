@@ -50,13 +50,14 @@ $OUTPUT->pageTitle('Grade', false, false);
     </div>
     <button type="submit" class="btn btn-default">Submit</button>
 </form>
+<h3>Grade Students</h3>
 <div class="table-responsive">
     <table class="table table-bordered table-hover">
         <thead>
-        <th>Student Name</th>
-        <th>Last Updated</th>
-        <th>Completed</th>
-        <th>Grade</th>
+        <th class="col-sm-5">Student Name</th>
+        <th class="col-sm-2">Last Updated</th>
+        <th class="col-sm-2">Completed</th>
+        <th class="col-sm-3">Grade</th>
         </thead>
         <tbody>
 <?php
@@ -66,12 +67,23 @@ foreach ($studentAndDate as $student_id => $mostRecentDate) {
     if (!$QW_DAO->isUserInstructor($CONTEXT->id, $student_id)) {
         $formattedMostRecentDate = $mostRecentDate->format("m/d/y") . " | " . $mostRecentDate->format("h:i A");
         $numberAnswered = $QW_DAO->getNumberQuestionsAnswered($student_id, $_SESSION["qw_id"]);
+        $grade = $QW_DAO->getStudentGrade($_SESSION["qw_id"], $student_id);
         ?>
         <tr>
             <td><?= $QW_DAO->findDisplayName($student_id) ?></td>
             <td><?= $formattedMostRecentDate ?></td>
             <td><?= $numberAnswered . '/' . $totalQuestions ?></td>
-            <td></td>
+            <td>
+                <form class="form-inline" action="actions/GradeStudent.php" method="post">
+                    <input type="hidden" name="student_id" value="<?=$student_id?>">
+                    <div class="form-group">
+                        <label>
+                        <input type="text" class="form-control" name="grade" value="<?=$grade ? $grade : ''?>">/<?=$pointsPossible?>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-default">Update</button>
+                </form>
+            </td>
         </tr>
         <?php
     }

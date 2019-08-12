@@ -200,6 +200,26 @@ class QW_DAO {
         return $this->PDOX->rowDie($query, $arr);
     }
 
+    function getStudentGrade($qw_id, $user_id) {
+        $query = "SELECT grade FROM {$this->p}qw_grade WHERE qw_id = :qw_id AND user_id = :user_id";
+        $arr = array(':qw_id' => $qw_id, ':user_id' => $user_id);
+        $context = $this->PDOX->rowDie($query, $arr);
+        return $context["grade"];
+    }
+
+    function createGrade($qw_id, $user_id, $grade, $current_time) {
+        $query = "INSERT INTO {$this->p}qw_grade (qw_id, user_id, grade, modified) VALUES (:qw_id, :user_id, :grade, :currentTime);";
+        $arr = array(':qw_id' => $qw_id,':user_id' => $user_id, ':grade' => $grade, ':currentTime' => $current_time);
+        $this->PDOX->queryDie($query, $arr);
+        return $this->PDOX->lastInsertId();
+    }
+
+    function updateGrade($qw_id, $user_id, $grade, $current_time) {
+        $query = "UPDATE {$this->p}qw_grade set grade = :grade, modified = :currentTime where user_id = :user_id AND qw_id = :qw_id;";
+        $arr = array(':grade' => $grade, ':currentTime' => $current_time, ':user_id' => $user_id, ':qw_id' => $qw_id);
+        $this->PDOX->queryDie($query, $arr);
+    }
+
     function findEmail($user_id) {
         $query = "SELECT email FROM {$this->p}lti_user WHERE user_id = :user_id;";
         $arr = array(':user_id' => $user_id);
