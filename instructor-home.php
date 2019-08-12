@@ -13,6 +13,8 @@ $p = $CFG->dbprefix;
 
 $QW_DAO = new QW_DAO($PDOX, $p);
 
+include("menu.php");
+
 // Start of the output
 $OUTPUT->header();
 
@@ -36,10 +38,13 @@ if ($questions) {
     }
 }
 
-include("menu.php");
+$OUTPUT->topNav($menu);
+
+echo('<div class="container-fluid">');
+
+$OUTPUT->flashMessages();
 
 ?>
-    <div class="container">
         <div id="toolTitle" class="h1">
             <button id="helpButton" type="button" class="btn btn-link pull-right" data-toggle="modal" data-target="#helpModal"><span class="fa fa-question-circle" aria-hidden="true"></span> Help</button>
             <span class="flx-cntnr flx-row flx-nowrap flx-start">

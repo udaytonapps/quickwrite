@@ -13,13 +13,6 @@ $p = $CFG->dbprefix;
 
 $QW_DAO = new QW_DAO($PDOX, $p);
 
-// Start of the output
-$OUTPUT->header();
-
-include("tool-header.html");
-
-$OUTPUT->bodyStart();
-
 $SetID = $_SESSION["qw_id"];
 
 $toolTitle = $QW_DAO->getMainTitle($_SESSION["qw_id"]);
@@ -35,9 +28,21 @@ $moreToSubmit = false;
 
 include("menu.php");
 
+// Start of the output
+$OUTPUT->header();
+
+include("tool-header.html");
+
+$OUTPUT->bodyStart();
+
+$OUTPUT->topNav($menu);
+
+echo '<div class="container-fluid">';
+
+$OUTPUT->flashMessages();
+
 if ($totalQuestions > 0) {
     ?>
-    <div class="container">
         <h1>
             <button id="helpButton" type="button" class="btn btn-link pull-right" data-toggle="modal"
                     data-target="#helpModal"><span class="fa fa-question-circle" aria-hidden="true"></span> Help
@@ -87,7 +92,6 @@ if ($totalQuestions > 0) {
     <?php
 } else {
     ?>
-    <div class="container">
         <h1>Quick Write</h1>
         <p class="lead">Your instructor has not yet configured this learning app.</p>
     </div>

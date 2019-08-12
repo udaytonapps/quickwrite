@@ -16,6 +16,8 @@ $QW_DAO = new QW_DAO($PDOX, $p);
 $questions = $QW_DAO->getQuestions($_SESSION["qw_id"]);
 $totalQuestions = count($questions);
 
+include("menu.php");
+
 // Start of the output
 $OUTPUT->header();
 
@@ -23,10 +25,13 @@ include("tool-header.html");
 
 $OUTPUT->bodyStart();
 
-include("menu.php");
+$OUTPUT->topNav($menu);
+
+echo '<div class="container-fluid">';
+
+$OUTPUT->flashMessages();
 
 ?>
-    <div class="container">
         <h1>
             <button id="helpButton" type="button" class="btn btn-link pull-right" data-toggle="modal" data-target="#helpModal"><span class="fa fa-question-circle" aria-hidden="true"></span> Help</button>
             Results <small>by Question</small>

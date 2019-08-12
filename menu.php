@@ -1,63 +1,21 @@
 <?php
 if ($USER->instructor) {
-?>
-<nav class="navbar navbar-fixed-top navbar-default">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#instructor-nav" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="index.php">Quick Write</a>
-        </div>
-
-        <div class="collapse navbar-collapse" id="instructor-nav">
-            <ul class="nav navbar-nav navbar-right">
-                <?php
-                if ('student-home.php' != basename($_SERVER['PHP_SELF'])) {
-                    ?>
-                    <li <?php if('instructor-home.php' == basename($_SERVER['PHP_SELF'])){echo ' class="active"';} ?>><a href="instructor-home.php"><span class="fa fa-cog" aria-hidden="true"></span> Build</a></li>
-                    <li <?php if('results-student.php' == basename($_SERVER['PHP_SELF']) || 'results-question.php' == basename($_SERVER['PHP_SELF']) || 'results-download.php' == basename($_SERVER['PHP_SELF'])){echo ' class="active dropdown"';}else{ echo 'class="dropdown"';} ?>>
-                        <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="fa fa-list-ul" aria-hidden="true"></span> Results <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="results-student.php">By Student</a></li>
-                            <li><a href="results-question.php">By Question</a></li>
-                            <li><a href="results-download.php">Download Results</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="student-home.php"><span class="fa fa-graduation-cap" aria-hidden="true"></span> Student View</a></li>
-                    <?php
-                } else {
-                    ?>
-                    <li><a href="instructor-home.php"><span class="fa fa-arrow-left" aria-hidden="true"></span> Exit Student View</a></li>
-                    <?php
-                }
-                ?>
-            </ul>
-        </div>
-    </div>
-    <div id="flashmessages">
-        <?php
-        $OUTPUT->flashMessages();
-        ?>
-    </div>
-</nav>
-<?php
+    $menu = new \Tsugi\UI\MenuSet();
+    $menu->setHome('Quick Write', 'index.php');
+    if ('student-home.php' != basename($_SERVER['PHP_SELF'])) {
+        $menu->addRight('<span class="fas fa-user-graduate" aria-hidden="true"></span> Student View', 'student-home.php');
+        $menu->addRight('<span class="fas fa-clipboard-check" aria-hidden="true"></span> Grade', 'grade.php');
+        $results = array(
+            new \Tsugi\UI\MenuEntry("By Student", "results-student.php"),
+            new \Tsugi\UI\MenuEntry("By Question", "results-question.php"),
+            new \Tsugi\UI\MenuEntry("Download Results", "results-download.php")
+        );
+        $menu->addRight('<span class="fas fa-poll-h" aria-hidden="true"></span> Results', $results);
+        $menu->addRight('<span class="fas fa-edit" aria-hidden="true"></span> Build', 'instructor-home.php');
+    } else {
+        $menu->addRight('Exit Student View <span class="fas fa-sign-out-alt" aria-hidden="true"></span>', 'instructor-home.php');
+    }
 } else {
-?>
-    <nav class="navbar navbar-fixed-top navbar-default">
-        <div class="container">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="index.php">Quick Write</a>
-            </div>
-        </div>
-        <div id="flashmessages">
-            <?php
-            $OUTPUT->flashMessages();
-            ?>
-        </div>
-    </nav>
-<?php
+    // No menu for students
+    $menu = false;
 }
