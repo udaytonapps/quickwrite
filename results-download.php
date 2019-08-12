@@ -28,11 +28,9 @@ echo '<div class="container-fluid">';
 
 $OUTPUT->flashMessages();
 
+$OUTPUT->pageTitle('Download Results', true, false);
+
 ?>
-        <h1>
-            <button id="helpButton" type="button" class="btn btn-link pull-right" data-toggle="modal" data-target="#helpModal"><span class="fa fa-question-circle" aria-hidden="true"></span> Help</button>
-            Download Results
-        </h1>
         <p class="lead">Click on the link below to download the student results.</p>
         <h4>
             <a href="actions/ExportToFile.php">
@@ -42,7 +40,9 @@ $OUTPUT->flashMessages();
     </div>
 <?php
 
-include("help.php");
+$OUTPUT->helpModal("Quick Write Help", __('
+                        <h4>Downloading Results</h4>
+                        <p>Click on the link to download an Excel file with all of the results for this Quick Write.</p>'));
 
 $OUTPUT->footerStart();
 

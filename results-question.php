@@ -31,11 +31,9 @@ echo '<div class="container-fluid">';
 
 $OUTPUT->flashMessages();
 
+$OUTPUT->pageTitle('Results <small>by Question</small>', true, false);
+
 ?>
-        <h1>
-            <button id="helpButton" type="button" class="btn btn-link pull-right" data-toggle="modal" data-target="#helpModal"><span class="fa fa-question-circle" aria-hidden="true"></span> Help</button>
-            Results <small>by Question</small>
-        </h1>
         <section id="questionResponses">
             <div class="list-group">
                 <?php
@@ -91,7 +89,10 @@ $OUTPUT->flashMessages();
 
 <?php
 
-include("help.php");
+$OUTPUT->helpModal("Quick Write Help", __('
+                        <h4>Viewing Results</H4>
+                        <p>You are viewing the results by question. Click on a question below to see what students answered for that question.</p>
+                        <p>For each question, students are sorted with the most recently modified at the top.</p>'));
 
 $OUTPUT->footerStart();
 

@@ -41,15 +41,9 @@ echo '<div class="container-fluid">';
 
 $OUTPUT->flashMessages();
 
+$OUTPUT->pageTitle($toolTitle, true, false);
+
 if ($totalQuestions > 0) {
-    ?>
-        <h1>
-            <button id="helpButton" type="button" class="btn btn-link pull-right" data-toggle="modal"
-                    data-target="#helpModal"><span class="fa fa-question-circle" aria-hidden="true"></span> Help
-            </button>
-            <?= $toolTitle ?>
-        </h1>
-        <?php
         foreach ($questions as $question) {
             $answer = $QW_DAO->getStudentAnswerForQuestion($question["question_id"], $USER->id);
             ?>
@@ -92,13 +86,21 @@ if ($totalQuestions > 0) {
     <?php
 } else {
     ?>
-        <h1>Quick Write</h1>
         <p class="lead">Your instructor has not yet configured this learning app.</p>
     </div>
     <?php
 }
 
-include("help.php");
+if ($USER->instructor) {
+    $OUTPUT->helpModal("Quick Write Help", __('
+                        <h4>Student View</h4>
+                        <p>You are seeing what a student will see when they access this tool. However, your answers will be cleared once you leave student view.</p>
+                        <p>Your answers will not show up in any of the results.</p>'));
+} else {
+    $OUTPUT->helpModal("Quick Write Help", __('
+                        <h4>What do I do?</h4>
+                        <p>Answer each question below. You must submit every question individually. Once you submit an answer to a question you cannot edit your answer.</p>'));
+}
 
 $OUTPUT->footerStart();
 
