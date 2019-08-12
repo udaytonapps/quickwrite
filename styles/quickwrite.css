@@ -100,3 +100,6 @@ p.response-text {
         float: none !important; /* import to override pull-right class */
     }
 }
+.h3.inline .question-text-span {
+    line-height: 2.28rem;
+}
