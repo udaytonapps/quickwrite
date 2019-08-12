@@ -15,6 +15,7 @@ $DATABASE_INSTALL = array(
 	link_id     INTEGER NOT NULL,
 	title       VARCHAR(255) NULL,
 	seen_splash BOOL NOT NULL DEFAULT 0,
+	points      FLOAT NOT NULL DEFAULT 100,
     modified    datetime NULL,
     
     PRIMARY KEY(qw_id)
@@ -51,6 +52,22 @@ $DATABASE_INSTALL = array(
     
     PRIMARY KEY(answer_id)
     
+) ENGINE = InnoDB DEFAULT CHARSET=utf8"),
+    array( "{$CFG->dbprefix}qw_grade",
+        "create table {$CFG->dbprefix}qw_grade (
+    grade_id        INTEGER NOT NULL AUTO_INCREMENT,
+    qw_id           INTEGER NOT NULL,
+    user_id         INTEGER NOT NULL,
+    points_earned   FLOAT NOT NULL DEFAULT 0,
+	modified        datetime NULL,
+    
+    CONSTRAINT `{$CFG->dbprefix}qw_ibfk_3`
+        FOREIGN KEY (`qw_id`)
+        REFERENCES `{$CFG->dbprefix}qw_main` (`qw_id`)
+        ON DELETE CASCADE,
+    
+    PRIMARY KEY(grade_id)
+    
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8")
 );
 
@@ -73,5 +90,13 @@ $DATABASE_UPGRADE = function($oldversion) {
         $q = $PDOX->queryDie($sql);
     }
 
-    return '201905101420';
+    // Add points column
+    if (!$PDOX->columnExists('points', "{$CFG->dbprefix}qw_main")) {
+        $sql = "ALTER TABLE {$CFG->dbprefix}qw_main ADD points FLOAT NOT NULL DEFAULT 100";
+        echo("Upgrading: " . $sql . "<br/>\n");
+        error_log("Upgrading: " . $sql);
+        $q = $PDOX->queryDie($sql);
+    }
+
+    return '201908112225';
 };

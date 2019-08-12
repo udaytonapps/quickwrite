@@ -13,6 +13,8 @@ $p = $CFG->dbprefix;
 
 $QW_DAO = new QW_DAO($PDOX, $p);
 
+$pointsPossible = $QW_DAO->getPointsPossible($_SESSION["qw_id"]);
+
 $students = $QW_DAO->getUsersWithAnswers($_SESSION["qw_id"]);
 $studentAndDate = array();
 foreach($students as $student) {
@@ -40,6 +42,14 @@ $OUTPUT->flashMessages();
 $OUTPUT->pageTitle('Grade', false, false);
 
 ?>
+<h3>Set Points Possible <small>Default 100</small></h3>
+<form class="form-inline" action="actions/UpdatePointsPossible.php" method="post">
+    <div class="form-group">
+        <label for="points_possible">Points Possible: </label>
+        <input type="text" class="form-control" id="points_possible" name="points_possible" value="<?=$pointsPossible?>">
+    </div>
+    <button type="submit" class="btn btn-default">Submit</button>
+</form>
 <div class="table-responsive">
     <table class="table table-bordered table-hover">
         <thead>
