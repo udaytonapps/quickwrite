@@ -47,8 +47,10 @@ if (!isset($answerText) || trim($answerText) == "") {
     // use wordwrap() if lines are longer than 70 characters
     $msg = wordwrap($msg,70);
 
+    $headers  = "From: LEARN < no-reply@learn.udayton.edu >\n";
+
     // send email
-    mail("elearning@udayton.edu","A new quickwrite has been submitted on Learn",$msg);
+    mail("elearning@udayton.edu", "A new quickwrite has been submitted on Learn", $msg, $headers);
 }
 
 $OUTPUT->buffer=true;
