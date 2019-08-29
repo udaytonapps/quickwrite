@@ -3,6 +3,7 @@ require_once "../../config.php";
 require_once('../dao/QW_DAO.php');
 
 use \Tsugi\Core\LTIX;
+use \Tsugi\Core\Result;
 use \QW\DAO\QW_DAO;
 
 $LAUNCH = LTIX::requireData();
@@ -35,7 +36,13 @@ if ($USER->instructor) {
 
         // Calculate percentage and post
         $percentage = ($grade * 1.0) / $QW_DAO->getPointsPossible($qw_id);
-        LTIX::gradeSend($percentage, false);
+
+        // Get result record for user
+        $resultqry = "SELECT * FROM {$p}lti_result WHERE user_id = :user_id AND link_id = :link_id";
+        $arr = array(':user_id' => $studentId, ':link_id' => $LINK->id);
+        $row = $PDOX->rowDie($resultqry, $arr);
+
+        Result::gradeSendStatic($percentage, $row);
     }
     header( 'Location: '.addSession('../grade.php') ) ;
 } else {
