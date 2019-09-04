@@ -11,20 +11,6 @@ class QW_DAO {
         $this->p = $p;
     }
 
-    function skipSplash($user_id) {
-        $query = "SELECT skip_splash FROM {$this->p}qw_splash WHERE user_id = :userId";
-        $arr = array(':userId' => $user_id);
-        $context = $this->PDOX->rowDie($query, $arr);
-        return $context["skip_splash"];
-    }
-
-    function toggleSkipSplash($user_id) {
-        $skip = $this->skipSplash($user_id) ? 0 : 1;
-        $query = "INSERT INTO {$this->p}qw_splash (user_id, skip_splash) VALUES (:userId, ".$skip.") ON DUPLICATE KEY UPDATE skip_splash = ".$skip;
-        $arr = array(':userId' => $user_id);
-        $this->PDOX->queryDie($query, $arr);
-    }
-
     function getOrCreateMain($user_id, $context_id, $link_id, $current_time) {
         $main_id = $this->getMainID($context_id, $link_id);
         if (!$main_id) {
@@ -46,6 +32,48 @@ class QW_DAO {
         $arr = array(':userId' => $user_id, ':contextId' => $context_id, ':linkId' => $link_id, ':currentTime' => $current_time);
         $this->PDOX->queryDie($query, $arr);
         return $this->PDOX->lastInsertId();
+    }
+
+    function findQuestionsForImport($user_id, $qw_id) {
+        $query = "SELECT q.*, m.title as tooltitle, c.title as sitetitle FROM {$this->p}qw_question q join {$this->p}qw_main m on q.qw_id = m.qw_id join {$this->p}lti_context c on m.context_id = c.context_id WHERE m.user_id = :userId AND m.qw_id != :qw_id";
+        $arr = array(':userId' => $user_id, ":qw_id" => $qw_id);
+        return $this->PDOX->allRowsDie($query, $arr);
+    }
+
+    function hasSeenSplash($qw_id) {
+        $query = "SELECT seen_splash FROM {$this->p}qw_main WHERE qw_id = :qwId";
+        $arr = array(':qwId' => $qw_id);
+        return $this->PDOX->rowDie($query, $arr)["seen_splash"];
+    }
+
+    function markAsSeen($qw_id) {
+        $query = "UPDATE {$this->p}qw_main set seen_splash = 1 WHERE qw_id = :qwId;";
+        $arr = array(':qwId' => $qw_id);
+        $this->PDOX->queryDie($query, $arr);
+    }
+
+    function getMainTitle($qw_id) {
+        $query = "SELECT title FROM {$this->p}qw_main WHERE qw_id = :qwId";
+        $arr = array(':qwId' => $qw_id);
+        return $this->PDOX->rowDie($query, $arr)["title"];
+    }
+
+    function getPointsPossible($qw_id) {
+        $query = "SELECT points FROM {$this->p}qw_main WHERE qw_id = :qwId";
+        $arr = array(':qwId' => $qw_id);
+        return $this->PDOX->rowDie($query, $arr)["points"];
+    }
+
+    function updateMainTitle($qw_id, $title, $current_time) {
+        $query = "UPDATE {$this->p}qw_main set title = :title, modified = :currentTime WHERE qw_id = :qwId;";
+        $arr = array(':title' => $title, ':currentTime' => $current_time, ':qwId' => $qw_id);
+        $this->PDOX->queryDie($query, $arr);
+    }
+
+    function updatePointsPossible($qw_id, $points, $current_time) {
+        $query = "UPDATE {$this->p}qw_main set points = :points, modified = :currentTime WHERE qw_id = :qwId;";
+        $arr = array(':points' => $points, ':currentTime' => $current_time, ':qwId' => $qw_id);
+        $this->PDOX->queryDie($query, $arr);
     }
 
     function deleteMain($qw_id, $user_id) {
@@ -105,6 +133,12 @@ class QW_DAO {
         $this->PDOX->queryDie($query, $arr);
     }
 
+    function updateQuestionNumber($question_id, $new_number) {
+        $query = "UPDATE {$this->p}qw_question set question_num = :questionNumber WHERE question_id = :questionId;";
+        $arr = array(':questionId' => $question_id, ':questionNumber' => $new_number);
+        $this->PDOX->queryDie($query, $arr);
+    }
+
     function getUsersWithAnswers($qw_id) {
         $query = "SELECT DISTINCT user_id FROM {$this->p}qw_answer a join {$this->p}qw_question q on a.question_id = q.question_id WHERE q.qw_id = :qwId;";
         $arr = array(':qwId' => $qw_id);
@@ -124,6 +158,13 @@ class QW_DAO {
         return $context['modified'];
     }
 
+    function getNumberQuestionsAnswered($user_id, $qw_id) {
+        $query = "SELECT count(*) as num_answered FROM {$this->p}qw_answer a join {$this->p}qw_question q on a.question_id = q.question_id WHERE a.user_id = :userId AND q.qw_id = :qwId AND a.answer_txt is not null;";
+        $arr = array(':userId' => $user_id, ':qwId' => $qw_id);
+        $context = $this->PDOX->rowDie($query, $arr);
+        return $context['num_answered'];
+    }
+
     function createAnswer($user_id, $question_id, $answer_txt, $current_time) {
         $query = "INSERT INTO {$this->p}qw_answer (user_id, question_id, answer_txt, modified) VALUES (:userId, :questionId, :answerTxt, :currentTime);";
         $arr = array(':userId' => $user_id,':questionId' => $question_id, ':answerTxt' => $answer_txt, ':currentTime' => $current_time);
@@ -134,6 +175,16 @@ class QW_DAO {
     function updateAnswer($answer_id, $answer_txt, $current_time) {
         $query = "UPDATE {$this->p}qw_answer set answer_txt = :answerTxt, modified = :currentTime where answer_id = :answerId;";
         $arr = array(':answerId' => $answer_id, ':answerTxt' => $answer_txt, ':currentTime' => $current_time);
+        $this->PDOX->queryDie($query, $arr);
+    }
+
+    function deleteAnswers($questions, $user_id) {
+        $questionIds = array();
+        foreach($questions as $question) {
+            array_push($questionIds, $question["question_id"]);
+        }
+        $query = "DELETE FROM {$this->p}qw_answer WHERE user_id = :userId AND question_id in (".implode(',', array_map('intval', $questionIds)).");";
+        $arr = array(':userId' => $user_id);
         $this->PDOX->queryDie($query, $arr);
     }
 
@@ -149,6 +200,26 @@ class QW_DAO {
         return $this->PDOX->rowDie($query, $arr);
     }
 
+    function getStudentGrade($qw_id, $user_id) {
+        $query = "SELECT grade FROM {$this->p}qw_grade WHERE qw_id = :qw_id AND user_id = :user_id";
+        $arr = array(':qw_id' => $qw_id, ':user_id' => $user_id);
+        $context = $this->PDOX->rowDie($query, $arr);
+        return $context["grade"];
+    }
+
+    function createGrade($qw_id, $user_id, $grade, $current_time) {
+        $query = "INSERT INTO {$this->p}qw_grade (qw_id, user_id, grade, modified) VALUES (:qw_id, :user_id, :grade, :currentTime);";
+        $arr = array(':qw_id' => $qw_id,':user_id' => $user_id, ':grade' => $grade, ':currentTime' => $current_time);
+        $this->PDOX->queryDie($query, $arr);
+        return $this->PDOX->lastInsertId();
+    }
+
+    function updateGrade($qw_id, $user_id, $grade, $current_time) {
+        $query = "UPDATE {$this->p}qw_grade set grade = :grade, modified = :currentTime where user_id = :user_id AND qw_id = :qw_id;";
+        $arr = array(':grade' => $grade, ':currentTime' => $current_time, ':user_id' => $user_id, ':qw_id' => $qw_id);
+        $this->PDOX->queryDie($query, $arr);
+    }
+
     function findEmail($user_id) {
         $query = "SELECT email FROM {$this->p}lti_user WHERE user_id = :user_id;";
         $arr = array(':user_id' => $user_id);
@@ -161,5 +232,18 @@ class QW_DAO {
         $arr = array(':user_id' => $user_id);
         $context = $this->PDOX->rowDie($query, $arr);
         return $context["displayname"];
+    }
+
+    function findInstructors($context_id) {
+        $query = "SELECT user_id FROM {$this->p}lti_membership WHERE context_id = :context_id AND role = '1000';";
+        $arr = array(':context_id' => $context_id);
+        return $this->PDOX->allRowsDie($query, $arr);
+    }
+
+    function isUserInstructor($context_id, $user_id) {
+        $query = "SELECT role FROM {$this->p}lti_membership WHERE context_id = :context_id AND user_id = :user_id;";
+        $arr = array(':context_id' => $context_id, ':user_id' => $user_id);
+        $role = $this->PDOX->rowDie($query, $arr);
+        return $role["role"] == '1000';
     }
 }

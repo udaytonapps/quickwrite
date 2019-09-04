@@ -1,0 +1,106 @@
+/* Quick Write Specific */
+.title-edit-input,
+.title-text-span {
+    margin-right: 14px;
+}
+.toolTitleAction {
+    font-size: 24px;
+}
+.question-text {
+    padding: 0 14px;
+}
+.question-row > a, .toolTitleAction {
+    padding: 0 8px 0 0;
+    font-weight: normal;
+    color: #919191;
+}
+.question-row > a:hover,
+.question-row > a:focus,
+.question-row > a:active,
+.toolTitleAction:hover,
+.toolTitleAction:focus,
+.toolTitleAction:active {
+    color: #1066EB;
+}
+.question-text-span:hover, .title-text-span:hover {
+    background-color: #BEDCFE;
+}
+.bg-highlight {
+    background-color: #BEDCFE;
+}
+#addQuestions {
+    margin-top: 20px;
+}
+.import-link {
+    padding-left: 36px;
+}
+.import-body {
+    max-height: 600px;
+    overflow-y: auto;
+}
+.response-panel-header,
+.response-list-group-item {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+div.header-col {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.response-row {
+    border-top: 1px solid #C4C4C4;
+    background-color: #FFEDC7;
+}
+a.response-collapse-link,
+a.response-collapse-link:active,
+a.response-collapse-link:focus,
+a.response-collapse-link:hover {
+    color: #111111;
+    opacity: 1;
+}
+.selected-row {
+    background-color: #FFC54A;
+}
+.response-badge {
+    background-color: #FFC54A;
+    color: #111111;
+    font-weight: 900;
+    font-size: 14px;
+    line-height: 21px;
+}
+.selected-row .badge.response-badge {
+    background-color: #ffffff;
+}
+p.response-text {
+    margin-top: 10px;
+}
+.results-table-hdr {
+    word-break: break-word;
+}
+.rotate{
+    -moz-transition: all 200ms linear;
+    -webkit-transition: all 200ms linear;
+    transition: all 200ms linear;
+}
+.rotate.open{
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+@media (max-width: 525px) {
+    .import-link {
+        display: block;
+        padding-top: 10px;
+        padding-left: 0;
+    }
+    #helpButton {
+        display: block;
+        margin: 0 0 0 auto;
+        float: none !important; /* import to override pull-right class */
+    }
+}
+.h3.inline .question-text-span,
+.h3.inline .question-number{
+    line-height: 2.28rem;
+}

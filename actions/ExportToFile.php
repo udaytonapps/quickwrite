@@ -52,40 +52,42 @@ if ( $USER->instructor ) {
     $columnIterator->next();
 
     foreach ($StudentList as $student ) {
-        $rowCounter++;
+        if (!$QW_DAO->isUserInstructor($CONTEXT->id, $student["user_id"])) {
+            $rowCounter++;
 
-        $UserID = $student["user_id"];
+            $UserID = $student["user_id"];
 
-        $Email = $QW_DAO->findEmail($UserID);
-        $UserName = explode("@",$Email);
+            $Email = $QW_DAO->findEmail($UserID);
+            $UserName = explode("@",$Email);
 
-        $Modified1 = $QW_DAO->getMostRecentAnswerDate($UserID, $qw_id);
-        $Modified  =  new DateTime($Modified1);
+            $Modified1 = $QW_DAO->getMostRecentAnswerDate($UserID, $qw_id);
+            $Modified  =  new DateTime($Modified1);
 
-        $displayName = $QW_DAO->findDisplayName($UserID);
-        $displayName = trim($displayName);
+            $displayName = $QW_DAO->findDisplayName($UserID);
+            $displayName = trim($displayName);
 
-        $lastName = (strpos($displayName, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $displayName);
-        $firstName = trim( preg_replace('#'.$lastName.'#', '', $displayName ) );
+            $lastName = (strpos($displayName, ' ') === false) ? '' : preg_replace('#.*\s([\w-]*)$#', '$1', $displayName);
+            $firstName = trim( preg_replace('#'.$lastName.'#', '', $displayName ) );
 
-        $exportFile->getActiveSheet()->setCellValue('A'.$rowCounter, $lastName.', '.$firstName);
+            $exportFile->getActiveSheet()->setCellValue('A'.$rowCounter, $lastName.', '.$firstName);
 
-        $exportFile->getActiveSheet()->setCellValue('B'.$rowCounter, $UserName[0]);
-        $exportFile->getActiveSheet()->setCellValue('C'.$rowCounter, $Modified->format('m/d/y - h:i A '));
+            $exportFile->getActiveSheet()->setCellValue('B'.$rowCounter, $UserName[0]);
+            $exportFile->getActiveSheet()->setCellValue('C'.$rowCounter, $Modified->format('m/d/y - h:i A '));
 
-        $col = 3;
-        foreach ($questions as $question ) {
-            $QID = $question["question_id"];
-            $A="";
+            $col = 3;
+            foreach ($questions as $question ) {
+                $QID = $question["question_id"];
+                $A="";
 
-            $answer = $QW_DAO->getStudentAnswerForQuestion($QID, $UserID);
-            if ($answer) {
-                $A = $answer["answer_txt"];
-                $A = str_replace("&#39;", "'", $A);
+                $answer = $QW_DAO->getStudentAnswerForQuestion($QID, $UserID);
+                if ($answer) {
+                    $A = $answer["answer_txt"];
+                    $A = str_replace("&#39;", "'", $A);
+                }
+
+                $exportFile->getActiveSheet()->setCellValueByColumnAndRow($col, $rowCounter, $A);
+                $col++;
             }
-
-            $exportFile->getActiveSheet()->setCellValueByColumnAndRow($col, $rowCounter, $A);
-            $col++;
         }
     }
     $columnIterator->next();
@@ -97,9 +99,11 @@ if ( $USER->instructor ) {
     }
     $exportFile->getActiveSheet()->calculateColumnWidths();
 
+    $filename = 'QuickWrite-'.$CONTEXT->title.'-Results.xls';
+
     // Redirect output to a client’s web browser (Excel5)
     header('Content-Type: application/vnd.ms-excel');
-    header('Content-Disposition: attachment;filename=Quick_Write.xls');
+    header('Content-Disposition: attachment;filename='.$filename);
     header('Cache-Control: max-age=0');
     // If you're serving to IE over SSL, then the following may be needed
     header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
@@ -108,5 +112,8 @@ if ( $USER->instructor ) {
     header ('Pragma: public'); // HTTP/1.0
     $objWriter = PHPExcel_IOFactory::createWriter($exportFile, 'Excel5');
     $objWriter->save('php://output');
+} else {
+    header( 'Location: '.addSession('../student-home.php') ) ;
 }
+
 
