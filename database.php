@@ -98,5 +98,13 @@ $DATABASE_UPGRADE = function($oldversion) {
         $q = $PDOX->queryDie($sql);
     }
 
-    return '201908112225';
+    // Add title column
+    if (!$PDOX->columnExists('title', "{$CFG->dbprefix}qw_main")) {
+        $sql = "ALTER TABLE {$CFG->dbprefix}qw_main ADD title VARCHAR(255) NULL";
+        echo("Upgrading: " . $sql . "<br/>\n");
+        error_log("Upgrading: " . $sql);
+        $q = $PDOX->queryDie($sql);
+    }
+
+    return '201909031328';
 };
