@@ -50,7 +50,7 @@ if (!isset($answerText) || trim($answerText) == "") {
     $headers  = "From: LEARN < no-reply@learn.udayton.edu >\n";
 
     // send email
-    mail("elearning@udayton.edu", "A new quickwrite has been submitted on Learn", $msg, $headers);
+    //mail("elearning@udayton.edu", "A new quickwrite has been submitted on Learn", $msg, $headers);
 }
 
 $OUTPUT->buffer=true;
