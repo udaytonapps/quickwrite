@@ -19,30 +19,29 @@ if ( $USER->instructor ) {
 
     $_SESSION["qw_id"] = $QW_DAO->getOrCreateMain($USER->id, $CONTEXT->id, $LINK->id, $currentTime);
 
-    $hasQuestions = $QW_DAO->getQuestions($_SESSION["qw_id"]);
+    $seenSplash = $QW_DAO->hasSeenSplash($_SESSION["qw_id"]);
 
-    if (!$hasQuestions) {
-        // No questions check if user wants to see the splash on new instances of tool
-        $skipSplash = $QW_DAO->skipSplash($USER->id);
-
-        if ($skipSplash) {
-            header( 'Location: '.addSession('instructor-home.php') ) ;
-        } else {
-            header('Location: '.addSession('splash.php'));
-        }
-    } else {
+    if ($seenSplash) {
         // Instructor has already setup this instance
         header( 'Location: '.addSession('instructor-home.php') ) ;
+    } else {
+        header('Location: '.addSession('splash.php'));
     }
 } else { // student
 
     $mainId = $QW_DAO->getMainID($CONTEXT->id, $LINK->id);
 
     if (!$mainId) {
-        echo ("<h1>Instructor needs to do stuff");
+        header('Location: '.addSession('splash.php'));
     } else {
         $_SESSION["qw_id"] = $mainId;
 
-        header( 'Location: '.addSession('student-home.php') ) ;
+        $questions = $QW_DAO->getQuestions($_SESSION["qw_id"]);
+
+        if (!$questions || count($questions) == 0) {
+            header('Location: '.addSession('splash.php'));
+        } else {
+            header( 'Location: '.addSession('student-home.php') ) ;
+        }
     }
 }

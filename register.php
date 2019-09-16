@@ -13,14 +13,15 @@ $REGISTER_LTI2 = array(
     "analytics" => array(
         "internal"
     ),
-    "source_url" => "https://github.com/udayton/mod-quickwrite",
+    "source_url" => "https://github.com/tsugitools/quickwrite",
     "screen_shots" => array(
-        "images/QW-Splash.jpg",
-        "images/QW-InstructorQuestions.jpg",
-        "images/QW-Instructor-ToolMenu.jpg",
-        "images/QW-InstructorQuestionResults.jpg",
-        "images/QW-InstructorAllResults.jpg",
-        "images/QW-StudentView.jpg",
-        "images/QW-StudentView-Answered.jpg",
+        "images/QW-Splash.png",
+        "images/QW-InstructorQuestions.png",
+        "images/QW-Instructor-ToolMenu.png",
+        "images/QW-Help.png",
+        "images/QW-Instructor-StudentResults.png",
+        "images/QW-Instructor-QuestionResults.png",
+        "images/QW-StudentView.png",
+        "images/QW-StudentView-Answered.png",
     )
 );

@@ -14,7 +14,9 @@ $QW_DAO = new QW_DAO($PDOX, $p);
 
 if ( $USER->instructor ) {
 
-    $QW_DAO->deleteMain($_SESSION["qw_id"], $USER->id);
+    $QW_DAO->markAsSeen($_SESSION["qw_id"]);
 
-    header( 'Location: '.addSession('../index.php') ) ;
+    header( 'Location: '.addSession('../instructor-home.php') ) ;
+} else {
+    header( 'Location: '.addSession('../student-home.php') ) ;
 }

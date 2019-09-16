@@ -15,25 +15,18 @@ if ($USER->instructor) {
 
     $result = array();
 
-    if (isset($_POST["toolTitle"])) {
+    if (isset($_POST["points_possible"]) && is_numeric($_POST["points_possible"])) {
         $currentTime = new DateTime('now', new DateTimeZone($CFG->timezone));
         $currentTime = $currentTime->format("Y-m-d H:i:s");
 
-        $QW_DAO->updateMainTitle($_SESSION["qw_id"], $_POST["toolTitle"], $currentTime);
+        $QW_DAO->updatePointsPossible($_SESSION["qw_id"], $_POST["points_possible"], $currentTime);
 
-        $_SESSION['success'] = "Title saved.";
+        $_SESSION['success'] = "Points Possible updated.";
     } else {
-        $_SESSION['error'] = "Title failed to save. Please try again.";
+        $_SESSION['error'] = "Points Possible failed to save or you provided an invalid number. Please try again.";
     }
 
-    $OUTPUT->buffer=true;
-    $result["flashmessage"] = $OUTPUT->flashMessages();
-
-    header('Content-Type: application/json');
-
-    echo json_encode($result, JSON_HEX_QUOT | JSON_HEX_TAG);
-
-    exit;
+    header( 'Location: '.addSession('../grade.php') ) ;
 } else {
     header( 'Location: '.addSession('../student-home.php') ) ;
 }

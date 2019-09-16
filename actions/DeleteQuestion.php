@@ -12,7 +12,7 @@ $p = $CFG->dbprefix;
 
 $QW_DAO = new QW_DAO($PDOX, $p);
 
-$question_id = isset($_GET["question_id"]) ? $_GET["question_id"] : false;
+$question_id = isset($_POST["question_id"]) ? $_POST["question_id"] : false;
 
 if ( $USER->instructor && $question_id ) {
 
@@ -20,5 +20,17 @@ if ( $USER->instructor && $question_id ) {
 
     $QW_DAO->fixUpQuestionNumbers($_SESSION["qw_id"]);
 
-    header( 'Location: '.addSession('../instructor-home.php') ) ;
-} 
+    $_SESSION['success'] = "Question Deleted.";
+
+    $OUTPUT->buffer=true;
+    $result["flashmessage"] = $OUTPUT->flashMessages();
+
+    header('Content-Type: application/json');
+
+    echo json_encode($result, JSON_HEX_QUOT | JSON_HEX_TAG);
+
+    exit;
+} else {
+    header( 'Location: '.addSession('../student-home.php') ) ;
+}
+

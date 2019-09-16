@@ -13,6 +13,8 @@ $p = $CFG->dbprefix;
 
 $QW_DAO = new QW_DAO($PDOX, $p);
 
+include("menu.php");
+
 // Start of the output
 $OUTPUT->header();
 
@@ -28,98 +30,114 @@ if (!$toolTitle) {
 
 $questions = $QW_DAO->getQuestions($_SESSION["qw_id"]);
 
-$totalQuestions = count($questions);
+// Clear any preview responses if there are questions
+if ($questions) {
+    $instructors = $QW_DAO->findInstructors($CONTEXT->id);
+    foreach($instructors as $instructor) {
+        $QW_DAO->deleteAnswers($questions, $instructor["user_id"]);
+    }
+}
+
+$OUTPUT->topNav($menu);
+
+echo('<div class="container-fluid">');
+
+$OUTPUT->flashMessages();
+
 ?>
-<div id="sideNav" class="side-nav">
-    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"><span class="fa fa-times"></span></a>
-    <a href="splash.php"><span class="fa fa-fw fa-pencil-square" aria-hidden="true"></span> Getting Started</a>
-    <a href="actions/ExportToFile.php"><span class="fa fa-fw fa-cloud-download" aria-hidden="true"></span> Export Results</a>
-    <a href="javascript:void(0);" id="editTitleLink"><span class="fa fa-fw fa-pencil" aria-hidden="true"></span> Edit Tool Title</a>
-    <a href="import-questions.php" class="disabled"><span class="fa fa-fw fa-upload" aria-hidden="true"></span> Import Questions</a>
-    <a href="actions/DeleteAll.php" onclick="return confirmResetTool();"><span class="fa fa-fw fa-trash" aria-hidden="true"></span> Reset Tool</a>
-</div>
-
-    <nav class="navbar navbar-default">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="javascript:void(0);" onclick="openSideNav();"><span class="fa fa-bars"></span> Menu</a>
-            </div>
+        <div id="toolTitle" class="h1">
+            <button id="helpButton" type="button" class="btn btn-link pull-right" data-toggle="modal" data-target="#helpModal"><span class="fa fa-question-circle" aria-hidden="true"></span> Help</button>
+            <span class="flx-cntnr flx-row flx-nowrap flx-start">
+                <span class="title-text-span" onclick="editTitleText();" tabindex="0"><?=$toolTitle?></span>
+                <a id="toolTitleEditLink" class="toolTitleAction" href="javascript:void(0);" onclick="editTitleText();">
+                    <span class="fa fa-fw fa-pencil" aria-hidden="true"></span>
+                    <span class="sr-only">Edit Title Text</span>
+                </a>
+            </span>
         </div>
-    </nav>
-
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-3 col-sm-offset-1" id="qwInfo">
-                <input type="hidden" id="sess" value="<?php echo($_GET["PHPSESSID"]) ?>">
-                <h1 contenteditable="true" id="toolTitle"><?php echo($toolTitle); ?></h1>
-                <p>Use the button below to add a question to the list. Once a question has been created, you can make changes to the text or delete it and its answers.</p>
-                <a href="#addOrEditQuestion" data-toggle="modal" class="btn btn-success small-shadow"><span class="fa fa-plus"></span> Add Question</a>
-            </div>
-            <div class="col-sm-7">
-                <div class="list-group fadeInFast" id="qwContentContainer">
-                    <div class="list-group-item">
-                        <a href="view-all-results.php" class="pull-right">View All Results <span id="viewAllChevron" class="fa fa-chevron-right"></span></a>
-                        <h3>Questions (<?php echo($totalQuestions); ?>)</h3>
-                    </div>
-                    <?php
-                    foreach ($questions as $question) {
-                        $totalAnswers = $QW_DAO->countAnswersForQuestion($question["question_id"]);
-                        echo('
-                        <div class="list-group-item">
-                            <h4 id="questionText'.$question["question_id"].'">'.$question["question_txt"].'</h4>
-                            <form id="questionTextForm'.$question["question_id"].'" action="actions/AddOrEditQuestion.php" method="post" style="display:none;">
-                                <p>
-                                    <input type="hidden" name="questionId" value="'.$question["question_id"].'">
-                                    <textarea class="form-control" name="questionText" rows="4" required>'.$question["question_txt"].'</textarea>
-                                </p>
-                                <div class="text-right">
-                                    <input type="submit" class="btn btn-success" value="Save" form="questionTextForm'.$question["question_id"].'">
-                                    <a href="javascript:void(0);" class="btn btn-link" onclick="cancelEditQuestionText('.$question["question_id"].');">Cancel</a>
-                                </div>                                
-                            </form>
-                            <div class="question-actions button-group pull-right">
-                                <a href="javascript:void(0);" onclick="editQuestionText('.$question["question_id"].');">
-                                    <span class="fa fa-lg fa-pencil" aria-hidden="true"></span>
-                                    <span class="sr-only">Edit Question Text</span>
-                                </a>
-                                <a onclick="return confirmDeleteQuestion();" href="actions/DeleteQuestion.php?question_id='.$question["question_id"].'">
-                                    <span aria-hidden="true" class="fa fa-lg fa-trash"></span>
-                                    <span class="sr-only">Delete Question</span>
-                                </a>
-                            </div>
-                            <a class="question-answers" href="view-answers.php?question_id='.$question["question_id"].'">Answers ('.$totalAnswers.')</a>
-                        </div>
-                        ');
-                    }
-                    ?>
+        <form id="toolTitleForm" action="actions/UpdateMainTitle.php" method="post" style="display:none;">
+                <label for="toolTitleInput" class="sr-only">Title Text</label>
+                <div class="h1 flx-cntnr flx-row flx-nowrap flx-start">
+                    <textarea class="title-edit-input flx-grow-all" id="toolTitleInput" name="toolTitle" rows="2"><?=$toolTitle?></textarea>
+                    <a id="toolTitleSaveLink" class="toolTitleAction" href="javascript:void(0);">
+                        <span class="fa fa-fw fa-save" aria-hidden="true"></span>
+                        <span class="sr-only">Save Title Text</span>
+                    </a>
+                    <a id="toolTitleCancelLink" class="toolTitleAction" href="javascript:void(0);">
+                        <span class="fa fa-fw fa-times" aria-hidden="true"></span>
+                        <span class="sr-only">Cancel Title Text</span>
+                    </a>
                 </div>
+        </form>
+        <p class="lead">Add questions to quickly collect feedback from your students.</p>
+        <section id="theQuestions">
+            <?php
+            foreach ($questions as $question) {
+                ?>
+                <div id="questionRow<?=$question["question_id"]?>" class="h3 inline flx-cntnr flx-row flx-nowrap flx-start question-row" data-question-number="<?=$question["question_num"]?>">
+                    <div class="question-number"><?=$question["question_num"]?>.</div>
+                    <div class="flx-grow-all question-text">
+                        <span class="question-text-span" onclick="editQuestionText(<?=$question["question_id"]?>)" id="questionText<?=$question["question_id"]?>" tabindex="0"><?= $question["question_txt"] ?></span>
+                        <form id="questionTextForm<?=$question["question_id"]?>" onsubmit="return confirmDeleteQuestionBlank(<?=$question["question_id"]?>)" action="actions/AddOrEditQuestion.php" method="post" style="display:none;">
+                            <input type="hidden" name="questionId" value="<?=$question["question_id"]?>">
+                            <label for="questionTextInput<?=$question["question_id"]?>" class="sr-only">Question Text</label>
+                            <textarea class="form-control" id="questionTextInput<?=$question["question_id"]?>" name="questionText" rows="2" required><?=$question["question_txt"]?></textarea>
+                        </form>
+                    </div>
+                    <a id="questionEditAction<?=$question["question_id"]?>" href="javascript:void(0);" onclick="editQuestionText(<?=$question["question_id"]?>)">
+                        <span class="fa fa-fw fa-pencil" aria-hidden="true"></span>
+                        <span class="sr-only">Edit Question Text</span>
+                    </a>
+                    <a id="questionReorderAction<?=$question["question_id"]?>" href="javascript:void(0);" onclick="moveQuestionUp(<?=$question["question_id"]?>)">
+                        <span class="fa fa-fw fa-chevron-circle-up" aria-hidden="true"></span>
+                        <span class="sr-only">Move Question Up</span>
+                    </a>
+                    <a id="questionDeleteAction<?=$question["question_id"]?>" href="javascript:void(0);" onclick="deleteQuestion(<?=$question["question_id"]?>)">
+                        <span aria-hidden="true" class="fa fa-fw fa-trash"></span>
+                        <span class="sr-only">Delete Question</span>
+                    </a>
+                    <a id="questionSaveAction<?=$question["question_id"]?>" href="javascript:void(0);" style="display:none;">
+                        <span aria-hidden="true" class="fa fa-fw fa-save"></span>
+                        <span class="sr-only">Save Question</span>
+                    </a>
+                    <a id="questionCancelAction<?=$question["question_id"]?>" href="javascript:void(0);" style="display: none;">
+                        <span aria-hidden="true" class="fa fa-fw fa-times"></span>
+                        <span class="sr-only">Cancel Question</span>
+                    </a>
+                </div>
+                <?php
+            }
+            ?>
+            <div id="newQuestionRow" class="h3 inline flx-cntnr flx-row flx-nowrap flx-start question-row" style="display:none;" data-question-number="<?=$questions ? count($questions)+1 : 1?>">
+                <div id="newQuestionNumber"><?=$questions ? count($questions)+1 : 1?>.</div>
+                <div class="flx-grow-all question-text">
+                    <form id="questionTextForm-1" action="actions/AddOrEditQuestion.php" method="post">
+                        <input type="hidden" name="questionId" value="-1">
+                        <label for="questionTextInput-1" class="sr-only">Question Text</label>
+                        <textarea class="form-control" id="questionTextInput-1" name="questionText" rows="2" required></textarea>
+                    </form>
+                </div>
+                <a id="questionSaveAction-1" href="javascript:void(0);">
+                    <span aria-hidden="true" class="fa fa-fw fa-save"></span>
+                    <span class="sr-only">Save Question</span>
+                </a>
+                <a id="questionCancelAction-1" href="javascript:void(0);">
+                    <span aria-hidden="true" class="fa fa-fw fa-times"></span>
+                    <span class="sr-only">Cancel Question</span>
+                </a>
             </div>
-        </div>
-
+        </section>
+        <section id="addQuestions">
+            <span class="h3"><a href="javascript:void(0);" id="addQuestionLink" onclick="showNewQuestionRow();" class="btn btn-success"><span class="fa fa-plus" aria-hidden="true"></span> Add Question</a></span>
+            <span class="h4 import-link"><a href="#importModal" data-toggle="modal"><span class="fa fa-files-o import-icon" aria-hidden="true"></span> Reuse Previous Question(s)</a></span>
+        </section>
     </div>
 
-    <div class="modal fade" id="addOrEditQuestion" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Add Question</h4>
-                </div>
-                <form method="post" id="addQuestionForm" action="actions/AddOrEditQuestion.php">
-                    <div class="modal-body">
-                        <input type="hidden" name="questionId" id="questionId" value="-1">
-                        <label for="questionText">Question Text</label>
-                        <textarea class="form-control" name="questionText" id="questionText" rows="4" autofocus required></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-                        <input type="submit" form="addQuestionForm" class="btn btn-success" value="Save">
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
+    <input type="hidden" id="sess" value="<?php echo($_GET["PHPSESSID"]) ?>">
 <?php
+
+include("help.php");
+include("import.php");
 
 $OUTPUT->footerStart();
 
