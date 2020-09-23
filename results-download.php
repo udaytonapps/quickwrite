@@ -22,6 +22,11 @@ foreach ($students as $student) {
 $questions = $QW_DAO->getQuestions($_SESSION["qw_id"]);
 $totalQuestions = count($questions);
 
+$toolTitle = $QW_DAO->getMainTitle($_SESSION["qw_id"]);
+
+if (!$toolTitle) {
+    $toolTitle = "Quick Write";
+}
 
 include("menu.php");
 
@@ -53,8 +58,8 @@ $OUTPUT->pageTitle('Download Results', true, false);
             <th>Student Name</th>
             <th>Most Recent Submission</th>
             <?php
-            for ($qnum = 1; $qnum <= $totalQuestions; $qnum++) {
-                echo '<th>Question ' . $qnum . '</th>';
+            foreach($questions as $q) {
+                echo '<th>Question '.$q["question_num"].': '.$question["question_txt"].'</th>';
             }
             ?>
         </tr>
@@ -101,7 +106,7 @@ $OUTPUT->footerStart();
                     {
                         extend: 'excelHtml5',
                         text: '<span class="fa fa-download" aria-hidden="true"></span> Download All Results (.xlsx)',
-                        title: '<?=$CONTEXT->title?>_QuickWrite_Results',
+                        title: '<?=$CONTEXT->title?>_<?=$toolTitle?>_Results',
                         className: 'btn btn-primary'
                     }
                 ]
