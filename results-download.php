@@ -59,7 +59,7 @@ $OUTPUT->pageTitle('Download Results', true, false);
             <th>Most Recent Submission</th>
             <?php
             foreach($questions as $q) {
-                echo '<th>Question '.$q["question_num"].': '.$question["question_txt"].'</th>';
+                echo '<th>Question '.$q["question_num"].': '.$q["question_txt"].'</th>';
             }
             ?>
         </tr>
